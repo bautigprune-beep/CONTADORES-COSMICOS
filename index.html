@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contadores Cósmicos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+        body {
+            background-color: #0b0c1e;
+            color: #e0f7fa;
+            font-family: 'Orbitron', sans-serif;
+            overflow: hidden; /* Evita el scroll cuando se añaden muchos contadores */
+            cursor: crosshair;
+        }
+
+        .contenedor-principal {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .info-panel {
+            text-align: center;
+            margin-bottom: 2rem;
+            max-width: 600px;
+        }
+
+        .titulo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+            color: #80deea;
+        }
+
+        .subtitulo {
+            font-size: 1.25rem;
+            color: #b3e5fc;
+            margin-top: 0.5rem;
+        }
+
+        .contadores-container {
+            position: relative;
+            width: 100%;
+            height: 100vh; /* Permite que los contadores se distribuyan por toda la pantalla */
+            pointer-events: none; /* Permite que los clics pasen a través del contenedor */
+        }
+
+        .contador {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            border-radius: 50%;
+            transition: transform 0.5s ease-out, background-color 0.5s ease-out, opacity 0.5s ease-out;
+            box-shadow: 0 0 8px #fff, inset 0 0 5px #fff, 0 0 15px rgba(255, 255, 255, 0.5);
+            animation: pulse 2s infinite alternate;
+            padding: 20px; /* Añade un padding para que el tamaño sea más dinámico */
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+
+        /* Colores y tamaños */
+        .color-enter { background-color: rgba(255, 128, 0, 0.7); width: 120px; height: 120px; font-size: 3rem; }
+        .color-space { background-color: rgba(64, 255, 128, 0.7); width: 100px; height: 100px; font-size: 2.5rem; }
+        .color-caps { background-color: rgba(255, 64, 128, 0.7); width: 150px; height: 150px; font-size: 3.5rem; }
+        .color-backspace { background-color: rgba(128, 64, 255, 0.7); width: 180px; height: 180px; font-size: 4rem; }
+        .fade-out { opacity: 0; transform: scale(0.5); }
+    </style>
+</head>
+<body class="bg-slate-900 text-cyan-200">
+
+    <!-- Contenedor principal de la aplicación -->
+    <div class="contenedor-principal flex-col min-h-screen items-center justify-center p-4">
+        
+        <!-- Panel de información y título -->
+        <div class="info-panel absolute top-4 left-1/2 -translate-x-1/2">
+            <h1 class="titulo text-4xl font-bold mb-2">Contadores Cósmicos</h1>
+            <p class="subtitulo text-center">Presiona <b class="text-white">ESPACIO</b> para una Estrella (10s)</p>
+            <p class="subtitulo text-center">Presiona <b class="text-white">ENTER</b> para un Planeta (15s)</p>
+            <p class="subtitulo text-center">Presiona <b class="text-white">BLOQ MAYÚS</b> para una Galaxia (30s)</p>
+            <p class="subtitulo text-center">Presiona <b class="text-white">BACKSPACE</b> para un Cometa (60s)</p>
+        </div>
+
+        <!-- Contenedor donde se añadirán los contadores dinámicamente -->
+        <div id="contadores-container" class="absolute inset-0"></div>
+
+    </div>
+
+    <script>
+        // Obtiene el contenedor donde se agregarán los contadores
+        const contadoresContainer = document.getElementById('contadores-container');
+
+        // Escucha el evento de pulsación de tecla en todo el documento
+        document.addEventListener('keydown', (event) => {
+            // Llama a la función 'crearContador' con la duración adecuada según la tecla
+            if (event.code === 'Space') {
+                event.preventDefault(); // Evita el comportamiento predeterminado (scroll)
+                crearContador(10);
+            } else if (event.code === 'Enter') {
+                event.preventDefault();
+                crearContador(15);
+            } else if (event.code === 'CapsLock') {
+                event.preventDefault();
+                crearContador(30);
+            } else if (event.code === 'Backspace') {
+                event.preventDefault();
+                crearContador(60);
+            }
+        });
+
+        /**
+         * Crea un nuevo elemento de contador y lo inicia.
+         * @param {number} duracion - La duración del contador en segundos.
+         */
+        function crearContador(duracion) {
+            // Crea un nuevo div para el contador
+            const contador = document.createElement('div');
+            
+            // Define el estilo y la clase según la duración
+            let claseColor;
+            let tamañoContador;
+            if (duracion === 10) {
+                claseColor = 'color-space';
+            } else if (duracion === 15) {
+                claseColor = 'color-enter';
+            } else if (duracion === 30) {
+                claseColor = 'color-caps';
+            } else if (duracion === 60) {
+                claseColor = 'color-backspace';
+            }
+
+            contador.className = `contador ${claseColor} transition-all duration-1000`;
+            contador.textContent = duracion;
+            
+            // Asigna una posición aleatoria en el contenedor
+            // Se resta el tamaño del contador para que no se salga de la pantalla
+            const xPos = Math.random() * (window.innerWidth - (duracion === 10 ? 100 : duracion === 15 ? 120 : duracion === 30 ? 150 : 180));
+            const yPos = Math.random() * (window.innerHeight - (duracion === 10 ? 100 : duracion === 15 ? 120 : duracion === 30 ? 150 : 180));
+            contador.style.left = `${xPos}px`;
+            contador.style.top = `${yPos}px`;
+            
+            // Añade el contador al contenedor
+            contadoresContainer.appendChild(contador);
+
+            // Inicia la cuenta regresiva
+            let tiempoRestante = duracion;
+            const intervalo = setInterval(() => {
+                tiempoRestante--;
+                if (tiempoRestante >= 0) {
+                    contador.textContent = tiempoRestante;
+                } else {
+                    clearInterval(intervalo); // Detiene el contador
+                    contador.textContent = '¡Fin!';
+                    // Aplica la clase para la animación de salida
+                    contador.classList.add('fade-out');
+                    // Elimina el elemento del DOM después de la animación
+                    setTimeout(() => {
+                        if (contadoresContainer.contains(contador)) {
+                            contadoresContainer.removeChild(contador);
+                        }
+                    }, 1000); // Espera 1 segundo para que la animación termine
+                }
+            }, 1000); // 1000 ms = 1 segundo
+        }
+    </script>
+</body>
+</html>
